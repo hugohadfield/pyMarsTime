@@ -11,7 +11,7 @@ http://www.giss.nasa.gov/tools/mars24/
 """
 version = "0.4.6"
 
-import time
+import datetime
 try:
     import numpy as np
     use_numpy=True
@@ -36,8 +36,10 @@ def j2000_epoch():
     return 2451545.0
 
 def mills():
-    """Returns the current time in milliseconds since Jan 1 1970"""
-    return time.time()*1000.
+    """
+    Returns the current time in milliseconds since Jan 1 1970 (in the UTC timezone)
+    """
+    return datetime.datetime.now(datetime.timezone.utc).timestamp()*1000
 
 def julian(m=None):
     """Returns the julian day number given milliseconds since Jan 1 1970"""
@@ -148,8 +150,25 @@ def j2000_offset_tt(jday_tt=None):
 
     return (jday_tt - j2000_epoch())
 
+def j2000_offset_tt_datetime(dt):
+    """
+    Uses datetime.datetime object to calculate the j2000 offset.
+    dt must be of type datetime.datetime
+    """
+    # Convert dt to utc
+    dt_utc = dt.astimezone(datetime.timezone.utc)
+    # Convert utc dtc to milliseconds
+    millis_utc = dt_utc.timestamp() * 1000
+    # Offset
+    jday_utc = julian(millis_utc)
+    jday_tt = julian_tt(jday_utc)
+    return j2000_offset_tt(jday_tt)
+
 def Mars_Mean_Anomaly(j2000_ott=None):
-    """Calculates the Mars Mean Anomaly given a j2000 julian day offset"""
+    """
+    Calculates the Mars Mean Anomaly given a j2000 julian day offset
+    If j2000_ott is not provided, the function will calculate the julian day offset since the J2000 epoch from the current time
+    """
     if j2000_ott is None:
         j2000_ott = j2000_offset_tt()
 
@@ -157,7 +176,10 @@ def Mars_Mean_Anomaly(j2000_ott=None):
     return M % 360.
 
 def FMS_Angle(j2000_ott=None):
-    """Returns the Fictional Mean Sun angle"""
+    """
+    Returns the Fictional Mean Sun angle
+    If j2000_ott is not provided, the function will calculate the julian day offset since the J2000 epoch from the current time
+    """
     if j2000_ott is None:
         j2000_ott = j2000_offset_tt()
         
@@ -165,7 +187,10 @@ def FMS_Angle(j2000_ott=None):
     return alpha_fms % 360.
 
 def alpha_perturbs(j2000_ott=None):
-    """Returns the perturbations to apply to the FMS Angle from orbital perturbations"""
+    """
+    Returns the perturbations to apply to the FMS Angle from orbital perturbations
+    If j2000_ott is not provided, the function will calculate the julian day offset since the J2000 epoch from the current time
+    """
     if j2000_ott is None:
         j2000_ott = j2000_offset_tt()
     
@@ -180,7 +205,10 @@ def alpha_perturbs(j2000_ott=None):
     return pbs
 
 def equation_of_center(j2000_ott=None):
-    """The true anomaly (v) - the Mean anomaly (M)"""
+    """
+    The true anomaly (v) - the Mean anomaly (M)
+    If j2000_ott is not provided, the function will calculate the julian day offset since the J2000 epoch from the current time
+    """
     if j2000_ott is None:
         j2000_ott = j2000_offset_tt()
 
@@ -197,7 +225,10 @@ def equation_of_center(j2000_ott=None):
     return val
 
 def Mars_Ls(j2000_ott=None):
-    """Returns the Areocentric solar longitude (aka Ls)"""
+    """
+    Returns the Areocentric solar longitude (aka Ls)
+    If j2000_ott is not provided, the function will calculate the  julian day offset since the J2000 epoch from the current time
+    """
     if j2000_ott is None:
         j2000_ott = j2000_offset_tt()
 
@@ -209,8 +240,10 @@ def Mars_Ls(j2000_ott=None):
     return ls
 
 def equation_of_time(j2000_ott=None):
-    """Equation of Time, to convert between Local Mean Solar Time
-    and Local True Solar Time, and make pretty analemma plots"""
+    """
+    Equation of Time, to convert between Local Mean Solar Time and Local True Solar Time, and make pretty analemma plots.
+    If j2000_ott is not provided, the function will calculate the  julian day offset since the J2000 epoch from the current time
+    """
     if j2000_ott is None:
         j2000_ott = j2000_offset_tt()
 
@@ -234,7 +267,10 @@ def j2000_ott_from_Mars_Solar_Date(msd=0):
     return j2000_ott-j2000_epoch()
 
 def Mars_Solar_Date(j2000_ott = None):
-    """Return the Mars Solar date"""
+    """
+    Return the Mars Solar date
+    If j2000_ott is not provided, the function will calculate the  julian day offset since the J2000 epoch from the current time
+    """
     if j2000_ott is None:
         jday_tt = julian_tt()
         j2000_ott = j2000_offset_tt(jday_tt)
@@ -243,7 +279,10 @@ def Mars_Solar_Date(j2000_ott = None):
     return MSD
     
 def Clancy_Year(j2000_ott = None):
-    """Returns the Mars Year date based on the reference date from Clancy(2000): 1955 April 11, 11am"""
+    """
+    Returns the Mars Year date based on the reference date from Clancy(2000): 1955 April 11, 11am
+    If j2000_ott is not provided, the function will calculate the  julian day offset since the J2000 epoch from the current time
+    """
     if j2000_ott is None:
         jday_tt = julian_tt()
         j2000_ott = j2000_offset_tt(jday_tt)
@@ -252,7 +291,10 @@ def Clancy_Year(j2000_ott = None):
     return year
 
 def Mars_Year(j2000_ott = None, return_length=False):
-    """Returns the Mars Year date based on the reference date 1955 April 11, 10:56:31 mtc after finding the j2k offsets of the zeroes of the Mars_Ls function. """
+    """
+    Returns the Mars Year date based on the reference date 1955 April 11, 10:56:31 mtc after finding the j2k offsets of the zeroes of the Mars_Ls function. 
+    If j2000_ott is not provided, the function will calculate the  julian day offset since the J2000 epoch from the current time
+    """
     jday_vals = [-16336.044076, -15649.093471, -14962.0892946, -14275.0960023, -13588.1458658, -12901.1772635, -12214.2082215, -11527.2637345, -10840.2842249, -10153.2828749, -9466.3114025, -8779.3356111, -8092.3607738, -7405.4236452, -6718.4615347, -6031.4574604, -5344.4876509, -4657.5318339, -3970.5474528, -3283.5848372, -2596.6329362, -1909.6426682, -1222.6617049, -535.7040268, 151.2736522, 838.2369682, 1525.1834712, 2212.1799182, 2899.1848518, 3586.1403058, 4273.1024234, 4960.0765368, 5647.0207838, 6333.986502, 7020.9875066, 7707.9629132, 8394.9318782, 9081.9102062, 9768.8526533, 10455.8028354, 11142.8050514, 11829.7873254, 12516.7417734, 13203.725449, 13890.6991502, 14577.6484912, 15264.6324865, 15951.6217969, 16638.5798914, 17325.5517216, 18012.5209097, 18699.4628887, 19386.4443201, 20073.4534421, 20760.4152811, 21447.3696661, 22134.3466251, 22821.2966642, 23508.2529432, 24195.2539572, 24882.2400506, 25569.2081296, 26256.1902459, 26943.1429481, 27630.0847446, 28317.0793316, 29004.0710936, 29691.0238241, 30377.9991486, 31064.9784277, 31751.9249377, 32438.896907, 33125.8902412, 33812.8520242, 34499.8183442, 35186.7944595, 35873.740573, 36560.7112423, 37247.7247318]
 
     year_vals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79]
@@ -311,7 +353,10 @@ def Mars_Year_np(j2k_np, jday_vals, year_vals, year_length, return_length=False)
         return y*1.0
 
 def Coordinated_Mars_Time(j2000_ott = None):
-    """The Mean Solar Time at the Prime Meridian"""
+    """
+    The Mean Solar Time at the Prime Meridian
+    If j2000_ott is not provided, the function will calculate the  julian day offset since the J2000 epoch from the current time
+    """
     if j2000_ott is None:
         jday_tt = julian_tt()
         j2000_ott = j2000_offset_tt(jday_tt)
@@ -321,7 +366,10 @@ def Coordinated_Mars_Time(j2000_ott = None):
     return MTC
 
 def Local_Mean_Solar_Time(longitude=0, j2000_ott=None):
-    """The Local Mean Solar Time given a planetographic longitude"""
+    """
+    The Local Mean Solar Time given a planetographic longitude
+    If j2000_ott is not provided, the function will calculate the  julian day offset since the J2000 epoch from the current time
+    """
     if j2000_ott is None:
         jday_tt = julian_tt()
         j2000_ott = j2000_offset_tt(jday_tt)
@@ -332,7 +380,10 @@ def Local_Mean_Solar_Time(longitude=0, j2000_ott=None):
     return LMST
 
 def Local_True_Solar_Time(longitude=0, j2000_ott=None):
-    """Local true solar time is the Mean solar time + equation of time perturbation"""
+    """
+    Local true solar time is the Mean solar time + equation of time perturbation
+    If j2000_ott is not provided, the function will calculate the  julian day offset since the J2000 epoch from the current time
+    """
     if j2000_ott is None:
         jday_tt = julian_tt()
         j2000_ott = j2000_offset_tt(jday_tt)
@@ -344,7 +395,10 @@ def Local_True_Solar_Time(longitude=0, j2000_ott=None):
     return ltst
 
 def subsolar_longitude(j2000_ott=None):
-    """returns the longitude of the subsolar point for a given julian day."""
+    """
+    returns the longitude of the subsolar point for a given julian day.
+    If j2000_ott is not provided, the function will calculate the  julian day offset since the J2000 epoch from the current time
+    """
     if j2000_ott is None:
         jday_tt = julian_tt()
         j2000_ott = j2000_offset_tt(jday_tt)
@@ -355,7 +409,10 @@ def subsolar_longitude(j2000_ott=None):
     return subsol % 360.
 
 def solar_declination(ls=None):
-    """Returns the solar declination"""
+    """
+    Returns the solar declination
+    If j2000_ott is not provided, the function will calculate the  julian day offset since the J2000 epoch from the current time
+    """
     if ls is None:
         ls= Mars_Ls()
     ls1 = ls * np.pi/180.
@@ -368,7 +425,10 @@ def solar_declination(ls=None):
     return dec
 
 def heliocentric_distance(j2000_ott=None):
-    """Instantaneous orbital radius"""
+    """
+    Instantaneous orbital radius
+    If j2000_ott is not provided, the function will calculate the  julian day offset since the J2000 epoch from the current time
+    """
     if j2000_ott is None:
         j2000_ott = j2000_offset_tt()
 
@@ -383,7 +443,10 @@ def heliocentric_distance(j2000_ott=None):
     return rm
 
 def heliocentric_longitude(j2000_ott=None):
-    """Heliocentric longitude, which is not Ls (offsets are different)"""
+    """
+    Heliocentric longitude, which is not Ls (offsets are different)
+    If j2000_ott is not provided, the function will calculate the  julian day offset since the J2000 epoch from the current time
+    """
     if j2000_ott is None:
         j2000_ott = j2000_offset_tt() 
     ls = Mars_Ls(j2000_ott)
@@ -396,7 +459,10 @@ def heliocentric_longitude(j2000_ott=None):
 
 
 def heliocentric_latitude(j2000_ott=None):
-    """Heliocentric Latitude, which is not Ls"""
+    """
+    Heliocentric Latitude, which is not Ls
+    If j2000_ott is not provided, the function will calculate the  julian day offset since the J2000 epoch from the current time
+    """
     if j2000_ott is None:
         j2000_ott = j2000_offset_tt()
 
@@ -408,7 +474,10 @@ def heliocentric_latitude(j2000_ott=None):
     return bm
 
 def hourangle(longitude=0, j2000_ott=None):
-    """Hourangle is the longitude - subsolar longitude"""
+    """
+    Hourangle is the longitude - subsolar longitude
+    If j2000_ott is not provided, the function will calculate the  julian day offset since the J2000 epoch from the current time
+    """
     if j2000_ott is None:
         jday_tt = julian_tt()
         j2000_ott = j2000_offset_tt()
@@ -418,7 +487,10 @@ def hourangle(longitude=0, j2000_ott=None):
     return hourangle
 
 def solar_zenith(longitude=0,latitude=0, j2000_ott=None):
-    """Zenith Angle, angle between sun and nadir"""
+    """
+    Zenith Angle, angle between sun and nadir
+    If j2000_ott is not provided, the function will calculate the  julian day offset since the J2000 epoch from the current time
+    """
    
     if latitude > 90 or latitude < -90:
         raise ValueError("Latitude out of Bounds: {0}".format(latitude))
@@ -440,7 +512,10 @@ def solar_zenith(longitude=0,latitude=0, j2000_ott=None):
     return Z
 
 def solar_elevation(longitude=0, latitude=0, j2000_ott=None):
-    """Elevation = 90-Zenith, angle between sun and flat surface """
+    """
+    Elevation = 90-Zenith, angle between sun and flat surface
+    If j2000_ott is not provided, the function will calculate the  julian day offset since the J2000 epoch from the current time
+    """
     if j2000_ott is None:
         jday_tt = julian_tt()
         j2000_ott = j2000_offset_tt(jday_tt)
@@ -449,7 +524,10 @@ def solar_elevation(longitude=0, latitude=0, j2000_ott=None):
     return 90 - Z
 
 def solar_azimuth(longitude=0, latitude=0, j2000_ott = None):
-    """Azimuth Angle, between sun and north pole"""
+    """
+    Azimuth Angle, between sun and north pole
+    If j2000_ott is not provided, the function will calculate the  julian day offset since the J2000 epoch from the current time
+    """
     if j2000_ott is None:
         jday_tt = julian_tt()
         j2000_ott = j2000_offset_tt(jday_tt)
