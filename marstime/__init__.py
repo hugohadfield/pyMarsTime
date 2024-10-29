@@ -9,7 +9,6 @@ Allison, M. 1997. Accurate analytic representations of solar time and seasons on
 http://www.giss.nasa.gov/tools/mars24/
 
 """
-version = "0.4.6"
 
 import datetime
 try:
@@ -18,6 +17,10 @@ try:
 except:
     use_numpy=False
     import math as np
+
+
+from .version import __version__
+version = __version__  # This is for compatability with the original code
 
 def west_to_east(west):
     """Convert from west longitude to east longitude,

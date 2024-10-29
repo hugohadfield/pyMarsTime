@@ -1,13 +1,17 @@
 #!/usr/bin/env python
 
 from setuptools import setup
-import versioneer
+import os
+
+here = os.path.abspath(os.path.dirname(__file__))
+exec(open(os.path.join(here, 'marstime/version.py')).read())
+
 
 requirements = [
     # package requirements go here
 ]
 setup(name="marstime",
-      version=versioneer.get_version(),
+      version=__version__,
       cmdclass=versioneer.get_cmdclass(),
       description='marstime library, implements the Mars24 algorithm [Allison and McEwan, 2000]',
       author="Christopher Lee",
